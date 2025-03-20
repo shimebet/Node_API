@@ -86,6 +86,6 @@ mongoose.connect('mongodb+srv://shimelis206:RpmTHAR1So2Mqe28@itsupportdb.lfnnv.m
     app.listen(port, () => {
       console.log(`Example app listening on port ${port}`)
     })
-  }).catch(()=>{
-    console.log(error)
-  })
+  }).catch((error) => { // ✅ Pass 'error' as a parameter
+    console.log("Database connection error:", error);
+});
