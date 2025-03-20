@@ -1,91 +1,41 @@
-const express = require('express')
+const express = require('express');
 const mongoose = require('mongoose');
-const Support = require('./models/itSupportModels');
-const app = express()
-const port = 3000
+const dotenv = require('dotenv');
+const cors = require('cors');
+const fs = require('fs');
+const crypto = require('crypto');
 
-app.use(express.json())
-app.use(express.urlencoded({extended: false}))
+dotenv.config();
+const app = express();
+app.use(express.json());
+app.use(cors());
 
-//routes
+// Auto-generate JWT_SECRET if not present
+if (!process.env.JWT_SECRET) {
+    const jwtSecretKey = crypto.randomBytes(64).toString('hex');
+    console.log("Generated JWT Secret Key:", jwtSecretKey);
 
-// get all data
-app.get('/support', async(req, res) => {
-  try{
-    const support = await Support.find({})
-    res.status(200).json(support);
-  }catch (error) {
-    console.log(error.message);
-    res.status(500).json({message: error.message})
-  }
-})
-
-//get data by id
-app.get('/support/:id', async(req, res) => {
-  try{
-    const {id} = req.params;
-    const support = await Support.findById(id);
-    res.status(200).json(support);
-  }catch (error) {
-    console.log(error.message);
-    res.status(500).json({message: error.message})
-  }
-})
-
-// post data
-app.post('/support', async(req, res) =>{
-try{
-const support = await Support.create(req.body)
-res.status(200).json(support);
-
-}catch (error) {
-  console.log(error.message);
-  res.status(500).json({message: error.message})
+    fs.appendFileSync('.env', `\nJWT_SECRET=${jwtSecretKey}\n`);
+    process.env.JWT_SECRET = jwtSecretKey;
 }
-})
 
-//update data
-app.put('/support/:id', async(req, res) => {
-  try{
-    const {id} = req.params;
-    const support = await Support.findByIdAndUpdate(id, req.body);
-    if(!support){
-    res.status(400).json({message: `can not find any data with Id ${id}`});
-    }
-    const updateSupport = await Support.findById(id);
-    res.status(200).json(updateSupport);
-  }catch (error) {
-    console.log(error.message);
-    res.status(500).json({message: error.message})
-  }
-})
+// ✅ Ensure MONGO_URI is correctly loaded
+const mongoURI = process.env.MONGO_URI;
+if (!mongoURI) {
+    console.error("❌ MONGO_URI is missing in .env file!");
+    process.exit(1);
+}
 
-//delete data
-app.delete('/support/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const support = await Support.findByIdAndDelete(id);
+// ✅ Connect to MongoDB
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log("✅ MongoDB Connected"))
+    .catch(err => console.log("❌ Database connection error:", err));
 
-    if (!support) {
-      return res.status(400).json({ message: `Cannot find any data with ID ${id}` });
-    }
+const userRoutes = require('./routes/userRoutes');
+const supportRoutes = require('./routes/supportRoutes');
 
-    res.status(200).json({ message: "Support entry deleted successfully", support });
+app.use('/api/users', userRoutes);
+app.use('/api/support', supportRoutes);
 
-  } catch (error) {
-    console.log(error.message);
-    res.status(500).json({ message: error.message });
-  }
-});
-
-//create mongoo db connection
-mongoose.set("strictQuery", false)
-mongoose.connect('mongodb+srv://shimelis206:RpmTHAR1So2Mqe28@itsupportdb.lfnnv.mongodb.net/Node-API?retryWrites=true&w=majority&appName=ITSUPPORTDB')
-  .then(() =>{
-    console.log('Connected to Mongoo DB!')
-    app.listen(port, () => {
-      console.log(`Example app listening on port ${port}`)
-    })
-  }).catch((error) => { // ✅ Pass 'error' as a parameter
-    console.log("Database connection error:", error);
-});
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
