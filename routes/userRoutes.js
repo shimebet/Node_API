@@ -4,6 +4,7 @@ const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const dotenv = require('dotenv');
+const authMiddleware = require('../middleware/authMiddleware'); // Optional if using auth
 
 dotenv.config();
 
@@ -16,10 +17,20 @@ const generateToken = (id) => {
 // Register User
 // =======================
 router.post('/register', async (req, res) => {
-  const { firstName, lastName, userName, email, password, role } = req.body;
+  const {
+    firstName,
+    lastName,
+    userName,
+    email,
+    password,
+    role,
+    branchName,
+    branchAddress,
+    branchGrade,
+    branchId,
+  } = req.body;
 
   try {
-    // Check if userName or email already exists
     const existingUser = await User.findOne({
       $or: [{ email }, { userName }],
     });
@@ -35,6 +46,10 @@ router.post('/register', async (req, res) => {
       email,
       password,
       role,
+      branchName,
+      branchAddress,
+      branchGrade,
+      branchId,
     });
 
     res.status(201).json({
@@ -42,6 +57,10 @@ router.post('/register', async (req, res) => {
       firstName: newUser.firstName,
       email: newUser.email,
       role: newUser.role,
+      branchName: newUser.branchName,
+      branchAddress: newUser.branchAddress,
+      branchGrade: newUser.branchGrade,
+      branchId: newUser.branchId,
       token: generateToken(newUser.id),
     });
 
@@ -66,6 +85,10 @@ router.post('/login', async (req, res) => {
         firstName: user.firstName,
         email: user.email,
         role: user.role,
+        branchName: user.branchName,
+        branchAddress: user.branchAddress,
+        branchGrade: user.branchGrade,
+        branchId: user.branchId,
         token: generateToken(user.id),
       });
     } else {
@@ -75,6 +98,20 @@ router.post('/login', async (req, res) => {
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ message: error.message });
+  }
+});
+
+// =======================
+// Get Logged-in User Info (Protected Route)
+// =======================
+router.get('/me', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch user data" });
   }
 });
 
