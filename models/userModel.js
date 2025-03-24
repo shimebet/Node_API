@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// ✅ Ensure Unique Index on Email
+// Ensure Unique Index on Email
 userSchema.index({ email: 1 }, { unique: true });
 
 // Hash password before saving

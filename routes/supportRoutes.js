@@ -3,7 +3,7 @@ const router = express.Router();
 const Support = require('../models/itSupportModel');
 const { protect } = require('../middleware/authMiddleware'); // Import JWT middleware
 
-// ✅ Protected Route: GET all support issues (JWT Required)
+// Protected Route: GET all support issues (JWT Required)
 router.get('/', protect, async (req, res) => {
   try {
     const support = await Support.find({});
@@ -13,7 +13,7 @@ router.get('/', protect, async (req, res) => {
   }
 });
 
-// ✅ Protected Route: GET support issue by ID (JWT Required)
+// Protected Route: GET support issue by ID (JWT Required)
 router.get('/:id', protect, async (req, res) => {
   try {
     const support = await Support.findById(req.params.id);
@@ -26,7 +26,7 @@ router.get('/:id', protect, async (req, res) => {
   }
 });
 
-// ✅ Protected Route: POST - Create a New Support Issue (JWT Required)
+// Protected Route: POST - Create a New Support Issue (JWT Required)
 router.post('/', protect, async (req, res) => {
   try {
     const support = await Support.create(req.body);
@@ -36,7 +36,7 @@ router.post('/', protect, async (req, res) => {
   }
 });
 
-// ✅ Protected Route: PUT - Update a Support Issue (JWT Required)
+// Protected Route: PUT - Update a Support Issue (JWT Required)
 router.put('/:id', protect, async (req, res) => {
   try {
     const support = await Support.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -49,7 +49,7 @@ router.put('/:id', protect, async (req, res) => {
   }
 });
 
-// ✅ Protected Route: DELETE - Delete a Support Issue (JWT Required)
+// Protected Route: DELETE - Delete a Support Issue (JWT Required)
 router.delete('/:id', protect, async (req, res) => {
   try {
     const support = await Support.findByIdAndDelete(req.params.id);
