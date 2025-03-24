@@ -2,15 +2,14 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
 const dotenv = require('dotenv');
-const authMiddleware = require('../middleware/authMiddleware'); // Optional if using auth
+const { protect } = require('../middleware/authMiddleware'); // ✅ Destructure protect
 
 dotenv.config();
 
 // Generate JWT Token
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 };
 
 // =======================
@@ -36,7 +35,7 @@ router.post('/register', async (req, res) => {
     });
 
     if (existingUser) {
-      return res.status(400).json({ message: "User with that email or username already exists" });
+      return res.status(400).json({ message: 'User with that email or username already exists' });
     }
 
     const newUser = await User.create({
@@ -63,15 +62,14 @@ router.post('/register', async (req, res) => {
       branchId: newUser.branchId,
       token: generateToken(newUser.id),
     });
-
   } catch (error) {
-    console.error("Registration error:", error);
+    console.error('Registration error:', error);
     res.status(500).json({ message: error.message });
   }
 });
 
 // =======================
-// Login User with userName
+// Login User (by userName)
 // =======================
 router.post('/login', async (req, res) => {
   const { userName, password } = req.body;
@@ -92,26 +90,25 @@ router.post('/login', async (req, res) => {
         token: generateToken(user.id),
       });
     } else {
-      res.status(401).json({ message: "Invalid username or password" });
+      res.status(401).json({ message: 'Invalid username or password' });
     }
-
   } catch (error) {
-    console.error("Login error:", error);
+    console.error('Login error:', error);
     res.status(500).json({ message: error.message });
   }
 });
 
 // =======================
-// Get Logged-in User Info (Protected Route)
+// Get Current User Info (Protected)
 // =======================
-router.get('/me', authMiddleware, async (req, res) => {
+router.get('/me', protect, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
-    if (!user) return res.status(404).json({ message: "User not found" });
+    const user = await User.findById(req.user._id).select('-password');
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
     res.status(200).json(user);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch user data" });
+    res.status(500).json({ message: 'Failed to fetch user data' });
   }
 });
 
