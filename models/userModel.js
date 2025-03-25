@@ -51,6 +51,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Please enter branch ID"],
     },
+    userImage: {
+      type: String, 
+      default: '',
+    },
     
   },
   { timestamps: true }

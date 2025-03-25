@@ -27,6 +27,7 @@ router.post('/register', async (req, res) => {
     branchAddress,
     branchGrade,
     branchId,
+    userImage, // <-- Add this line
   } = req.body;
 
   try {
@@ -49,6 +50,7 @@ router.post('/register', async (req, res) => {
       branchAddress,
       branchGrade,
       branchId,
+      userImage, // <-- Save the image here
     });
 
     res.status(201).json({
@@ -60,6 +62,7 @@ router.post('/register', async (req, res) => {
       branchAddress: newUser.branchAddress,
       branchGrade: newUser.branchGrade,
       branchId: newUser.branchId,
+      userImage: newUser.userImage, // <-- Return it
       token: generateToken(newUser.id),
     });
   } catch (error) {
@@ -67,6 +70,7 @@ router.post('/register', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
 
 // =======================
 // Login User (by userName)
@@ -87,6 +91,7 @@ router.post('/login', async (req, res) => {
         branchAddress: user.branchAddress,
         branchGrade: user.branchGrade,
         branchId: user.branchId,
+        userImage: user.userImage,
         token: generateToken(user.id),
       });
     } else {
