@@ -27,7 +27,7 @@ router.get('/:id', protect, async (req, res) => {
   }
 });
 
-// POST - Create a new support issue with autofilled user details
+// POST - Create a new support issue and return populated user info
 router.post('/', protect, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -42,13 +42,16 @@ router.post('/', protect, async (req, res) => {
       user: user._id,
     });
 
-    res.status(201).json(support);
+    // 👇 Populate the user info before sending response
+    const populatedSupport = await Support.findById(support._id).populate('user', 'username email');
+
+    res.status(201).json(populatedSupport);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// PUT - Update a support issue (only owner can update, optional)
+// PUT - Update a support issue (only owner can update)
 router.put('/:id', protect, async (req, res) => {
   try {
     const support = await Support.findById(req.params.id);
@@ -57,19 +60,20 @@ router.put('/:id', protect, async (req, res) => {
       return res.status(404).json({ message: "Support issue not found" });
     }
 
-    // Optional: Only allow update if user is the creator
     if (support.user.toString() !== req.user.id) {
       return res.status(403).json({ message: "Not authorized" });
     }
 
-    const updatedSupport = await Support.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updatedSupport = await Support.findByIdAndUpdate(req.params.id, req.body, { new: true })
+      .populate('user', 'username email'); // 👈 populate after update
+
     res.status(200).json(updatedSupport);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// DELETE - Delete a support issue (only owner can delete, optional)
+// DELETE - Delete a support issue (only owner can delete)
 router.delete('/:id', protect, async (req, res) => {
   try {
     const support = await Support.findById(req.params.id);
@@ -78,12 +82,12 @@ router.delete('/:id', protect, async (req, res) => {
       return res.status(404).json({ message: "Support issue not found" });
     }
 
-    // Optional: Only allow delete if user is the creator
     if (support.user.toString() !== req.user.id) {
       return res.status(403).json({ message: "Not authorized" });
     }
 
     await support.deleteOne();
+
     res.status(200).json({ message: "Support issue deleted successfully", support });
   } catch (error) {
     res.status(500).json({ message: error.message });
