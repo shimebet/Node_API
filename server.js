@@ -19,17 +19,17 @@ if (!process.env.JWT_SECRET) {
     process.env.JWT_SECRET = jwtSecretKey;
 }
 
-// ✅ Ensure MONGO_URI is correctly loaded
+// Ensure MONGO_URI is correctly loaded
 const mongoURI = process.env.MONGO_URI;
 if (!mongoURI) {
-    console.error("❌ MONGO_URI is missing in .env file!");
+    console.error("MONGO_URI is missing in .env file!");
     process.exit(1);
 }
 
-// ✅ Connect to MongoDB
+// Connect to MongoDB
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => console.log("✅ MongoDB Connected"))
-    .catch(err => console.log("❌ Database connection error:", err));
+    .then(() => console.log("MongoDB Connected"))
+    .catch(err => console.log("Database connection error:", err));
 
 const userRoutes = require('./routes/userRoutes');
 const supportRoutes = require('./routes/supportRoutes');
@@ -38,4 +38,4 @@ app.use('/api/users', userRoutes);
 app.use('/api/support', supportRoutes);
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(` Server running on port ${PORT}`));
