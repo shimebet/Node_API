@@ -34,7 +34,7 @@ const userSchema = new mongoose.Schema(
     },
     branchName: {
       type: String,
-      required: [true, "Please enter branch name"],
+      required: false,
     },
     
     branchAddress: {
@@ -44,16 +44,17 @@ const userSchema = new mongoose.Schema(
     
     branchGrade: {
       type: String,
-      required: [true, "Please enter branch grade"],
+      required: false,
     },
     
     branchId: {
       type: String,
-      required: [true, "Please enter branch ID"],
+      required: false,
     },
     userImage: {
       type: String, 
       default: '',
+      required: false,
     },
     
   },
