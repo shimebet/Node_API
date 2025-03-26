@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Support = require('../models/itSupportModel');
-const User = require('../models/users'); // 👈 import your User model
+const User = require('../models/User'); // 👈 import your User model
 const { protect } = require('../middleware/authMiddleware');
 
 // GET all support issues with user info
