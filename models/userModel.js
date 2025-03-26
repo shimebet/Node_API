@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Please enter last name"],
     },
-    userName: {
+    username: {
       type: String,
       required: [true, "Please enter username"],
       unique: true,
@@ -63,7 +63,7 @@ const userSchema = new mongoose.Schema(
 
 // Ensure Unique Index
 userSchema.index({ email: 1 }, { unique: true });
-userSchema.index({ userName: 1 }, { unique: true });
+userSchema.index({ username: 1 }, { unique: true });
 
 // Hash password before saving
 userSchema.pre("save", async function (next) {

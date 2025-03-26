@@ -9,11 +9,12 @@ const itsupportSchema = new mongoose.Schema(
     issueSolution: { type: String, required: [true, "Please enter Issue Solution"] },
     issueImage: { type: String, required: false },
 
+    // 👇 Reference to User model
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
-    },
+      required: true
+    }
   },
   { timestamps: true }
 );
