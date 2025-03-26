@@ -1,22 +1,23 @@
 const express = require('express');
 const router = express.Router();
 const Support = require('../models/itSupportModel');
-const { protect } = require('../middleware/authMiddleware'); // Import JWT middleware
+const User = require('../models/User'); // 👈 import your User model
+const { protect } = require('../middleware/authMiddleware');
 
-// Protected Route: GET all support issues (JWT Required)
+// GET all support issues with user info
 router.get('/', protect, async (req, res) => {
   try {
-    const support = await Support.find({});
+    const support = await Support.find({}).populate('user', 'username email');
     res.status(200).json(support);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// Protected Route: GET support issue by ID (JWT Required)
+// GET support issue by ID with user info
 router.get('/:id', protect, async (req, res) => {
   try {
-    const support = await Support.findById(req.params.id);
+    const support = await Support.findById(req.params.id).populate('user', 'username email');
     if (!support) {
       return res.status(404).json({ message: "Support issue not found" });
     }
@@ -26,36 +27,63 @@ router.get('/:id', protect, async (req, res) => {
   }
 });
 
-// Protected Route: POST - Create a New Support Issue (JWT Required)
+// POST - Create a new support issue with autofilled user details
 router.post('/', protect, async (req, res) => {
   try {
-    const support = await Support.create(req.body);
+    const user = await User.findById(req.user.id);
+
+    const support = await Support.create({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      issueTitle: req.body.issueTitle,
+      issueDescription: req.body.issueDescription,
+      issueSolution: req.body.issueSolution,
+      issueImage: req.body.issueImage,
+      user: user._id,
+    });
+
     res.status(201).json(support);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// Protected Route: PUT - Update a Support Issue (JWT Required)
+// PUT - Update a support issue (only owner can update, optional)
 router.put('/:id', protect, async (req, res) => {
   try {
-    const support = await Support.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const support = await Support.findById(req.params.id);
+
     if (!support) {
       return res.status(404).json({ message: "Support issue not found" });
     }
-    res.status(200).json(support);
+
+    // Optional: Only allow update if user is the creator
+    if (support.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    const updatedSupport = await Support.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.status(200).json(updatedSupport);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// Protected Route: DELETE - Delete a Support Issue (JWT Required)
+// DELETE - Delete a support issue (only owner can delete, optional)
 router.delete('/:id', protect, async (req, res) => {
   try {
-    const support = await Support.findByIdAndDelete(req.params.id);
+    const support = await Support.findById(req.params.id);
+
     if (!support) {
       return res.status(404).json({ message: "Support issue not found" });
     }
+
+    // Optional: Only allow delete if user is the creator
+    if (support.user.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    await support.deleteOne();
     res.status(200).json({ message: "Support issue deleted successfully", support });
   } catch (error) {
     res.status(500).json({ message: error.message });

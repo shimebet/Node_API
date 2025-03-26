@@ -7,8 +7,12 @@ const itsupportSchema = new mongoose.Schema(
     issueTitle: { type: String, required: [true, "Please enter Issue Title"] },
     issueDescription: { type: String, required: [true, "Please enter Issue Description"] },
     issueSolution: { type: String, required: [true, "Please enter Issue Solution"] },
-    issueImage: { type: String,
-    required: false,
+    issueImage: { type: String, required: false },
+
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
     },
   },
   { timestamps: true }
