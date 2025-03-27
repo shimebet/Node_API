@@ -21,7 +21,7 @@ router.post('/register', async (req, res) => {
   const {
     firstName,
     lastName,
-    userName,
+    username,
     email,
     password,
     role,
@@ -34,7 +34,7 @@ router.post('/register', async (req, res) => {
 
   try {
     const existingUser = await User.findOne({
-      $or: [{ email }, { userName }],
+      $or: [{ email }, { username }],
     });
 
     if (existingUser) {
@@ -44,7 +44,7 @@ router.post('/register', async (req, res) => {
     const newUser = await User.create({
       firstName,
       lastName,
-      userName,
+      username,
       email,
       password,
       role,
@@ -78,10 +78,10 @@ router.post('/register', async (req, res) => {
 // Login User (by userName)
 // =======================
 router.post('/login', async (req, res) => {
-  const { userName, password } = req.body;
+  const { username, password } = req.body;
 
   try {
-    const user = await User.findOne({ userName });
+    const user = await User.findOne({ username });
 
     if (user && (await user.matchPassword(password))) {
       res.status(200).json({
