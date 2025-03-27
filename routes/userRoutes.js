@@ -3,7 +3,9 @@ const router = express.Router();
 const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
-const { protect } = require('../middleware/authMiddleware'); // ✅ Destructure protect
+const { protect } = require('../middleware/authMiddleware'); 
+const Support = require('../models/itSupportModel');
+
 
 dotenv.config();
 
