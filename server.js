@@ -27,7 +27,7 @@ if (!mongoURI) {
 }
 
 // Connect to MongoDB
-mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(mongoURI, { useNewUrlParser: true, })
     .then(() => console.log("MongoDB Connected"))
     .catch(err => console.log("Database connection error:", err));
 

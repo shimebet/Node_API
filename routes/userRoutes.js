@@ -87,11 +87,11 @@ router.post('/login', async (req, res) => {
         firstName: user.firstName,
         email: user.email,
         role: user.role,
-        branchName: user.branchName,
-        branchAddress: user.branchAddress,
-        branchGrade: user.branchGrade,
-        branchId: user.branchId,
-        userImage: user.userImage,
+        // branchName: user.branchName,
+        // branchAddress: user.branchAddress,
+        // branchGrade: user.branchGrade,
+        // branchId: user.branchId,
+      //  userImage: user.userImage,
         token: generateToken(user.id),
       });
     } else {
@@ -108,12 +108,33 @@ router.post('/login', async (req, res) => {
 // =======================
 router.get('/me', protect, async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select('-password');
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    const user = await User.findById(req.user.id).select('-password'); // exclude password
 
-    res.status(200).json(user);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const issues = await Support.find({ user: user._id })
+      .populate('user', 'username email');
+
+    res.status(200).json({
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+      branchName: user.branchName,
+      branchAddress: user.branchAddress,
+      branchGrade: user.branchGrade,
+      branchId: user.branchId,
+      userImage: user.userImage,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      issues, // populated support issues
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch user data' });
+    res.status(500).json({ message: error.message });
   }
 });
 
