@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const User = require('../models/userModel');
 const Support = require('../models/itSupportModel');
-const { protect } = require('../middleware/authMiddleware');
+const { protect, allowRoles } = require('../middleware/authMiddleware');
 
 dotenv.config();
 
@@ -141,12 +141,8 @@ router.get('/me', protect, async (req, res) => {
 // =======================
 // Get All Users (Admin Only)
 // =======================
-router.get('/', protect, async (req, res) => {
+router.get('/', protect, allowRoles('Admin'), async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Access denied' });
-    }
-
     const users = await User.find().select('-password');
     res.status(200).json(users);
   } catch (error) {
@@ -167,7 +163,7 @@ router.put('/:id', protect, async (req, res) => {
     }
 
     // Allow only admin or the same user to update
-    if (req.user.role !== 'admin' && req.user.id !== user.id.toString()) {
+    if (req.user.role !== 'Admin' && req.user.id !== user.id.toString()) {
       return res.status(403).json({ message: 'Access denied' });
     }
 
@@ -218,12 +214,8 @@ router.put('/:id', protect, async (req, res) => {
 // =======================
 // Delete User by ID (Admin Only)
 // =======================
-router.delete('/:id', protect, async (req, res) => {
+router.delete('/:id', protect, allowRoles('Admin'), async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Access denied' });
-    }
-
     const user = await User.findById(req.params.id);
 
     if (!user) {
